@@ -3,6 +3,7 @@ using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
 using healthguard.POST;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -45,7 +46,7 @@ namespace healthguard.Controllers
             if (!_сompanyManagerRepository.CompanyManagerExists(managerId))
                 return NotFound();
 
-            var сompanyManager = _mapper.Map<CompanyManagerDto>(_сompanyManagerRepository.GetCompanyManager(managerId));
+            var сompanyManager = _сompanyManagerRepository.GetCompanyManager(managerId);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -57,19 +58,10 @@ namespace healthguard.Controllers
         [ProducesResponseType(400)]
         public IActionResult CreateCompanyManager(
             [FromQuery] int companyId, 
-            [FromBody] CompanyManagerPOST companyManagerCreate)
+            [FromBody] CompanyManagerDto companyManagerCreate)
         {
             if (companyManagerCreate == null)
                 return BadRequest(ModelState);
-
-            var companyManager = _сompanyManagerRepository.GetCompanyManagers()
-                .Where(e => e.Email == companyManagerCreate.Email).FirstOrDefault();
-
-            if (companyManager != null)
-            {
-                ModelState.AddModelError("", "Company Manager with this email already exists");
-                return StatusCode(422, ModelState);
-            }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -87,6 +79,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPut("{managerId}")]
+        [Authorize(Roles = "Administrator,CompanyManager")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -114,6 +107,7 @@ namespace healthguard.Controllers
         }
 
         [HttpDelete("{managerId}")]
+        [Authorize(Roles = "Administrator,CompanyManager")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

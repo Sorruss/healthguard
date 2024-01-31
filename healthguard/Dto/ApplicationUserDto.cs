@@ -2,7 +2,7 @@
 
 namespace healthguard.Dto
 {
-    public class UserDto
+    public class ApplicationUserDto
     {
         public string Id { get; set; } = string.Empty;
         
@@ -22,5 +22,9 @@ namespace healthguard.Dto
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = string.Empty;
+        
+        public string LastName { get; set; }
+        public string MiddleName { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

@@ -2,11 +2,12 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
-using healthguard.POST;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/Administrators")]
     [ApiController]
     public class AdministratorController : Controller
@@ -40,7 +41,7 @@ namespace healthguard.Controllers
             if (!_administratorRepository.AdministratorExists(adminId))
                 return NotFound();
 
-            var administrator = _mapper.Map<AdministratorDto>(_administratorRepository.GetAdministrator(adminId));
+            var administrator = _administratorRepository.GetAdministrator(adminId);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -50,20 +51,11 @@ namespace healthguard.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateAdministrator([FromBody] AdministratorPOST administratorCreate)
+        public IActionResult CreateAdministrator([FromBody] AdministratorDto administratorCreate)
         {
             if (administratorCreate == null)
                 return BadRequest(ModelState);
-
-            var administrator = _administratorRepository.GetAdministrators()
-                .Where(e => e.Email == administratorCreate.Email).FirstOrDefault();
-
-            if (administrator != null)
-            {
-                ModelState.AddModelError("", "Administrator with this email already exists");
-                return StatusCode(422, ModelState);
-            }
-
+            
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -81,7 +73,7 @@ namespace healthguard.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateAdministrator(int adminId, [FromBody] AdministratorPOST administratorUpdate)
+        public IActionResult UpdateAdministrator(int adminId, [FromBody] Administrator administratorUpdate)
         {
             if (administratorUpdate == null || administratorUpdate.AdministratorId != adminId)
                 return BadRequest(ModelState);

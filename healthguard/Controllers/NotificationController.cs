@@ -2,6 +2,7 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -67,6 +68,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateNotification(
@@ -89,6 +91,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPut("{notifId}")]
+        [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -114,6 +117,7 @@ namespace healthguard.Controllers
         }
 
         [HttpDelete("{notifId}")]
+        [Authorize(Roles = "Administrator,Doctor,Patient")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

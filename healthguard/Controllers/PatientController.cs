@@ -3,6 +3,7 @@ using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
 using healthguard.POST;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -48,7 +49,7 @@ namespace healthguard.Controllers
             if (!_patientRepository.PatientExists(patientId))
                 return NotFound();
 
-            var patient = _mapper.Map<PatientDto>(_patientRepository.GetPatient(patientId));
+            var patient = _patientRepository.GetPatient(patientId);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -111,15 +112,6 @@ namespace healthguard.Controllers
             if (patientCreate == null)
                 return BadRequest(ModelState);
 
-            var patient = _patientRepository.GetPatients()
-                .Where(e => e.Email == patientCreate.Email).FirstOrDefault();
-
-            if (patient != null)
-            {
-                ModelState.AddModelError("", "Patient with this email already exists");
-                return StatusCode(422, ModelState);
-            }
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -137,10 +129,11 @@ namespace healthguard.Controllers
         }
 
         [HttpPut("{patientId}")]
+        [Authorize(Roles = "Administrator,Patient")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult UpdatePatient(int patientId, [FromBody] PatientPOST patientUpdate)
+        public IActionResult UpdatePatient(int patientId, [FromBody] PatientUPDATE patientUpdate)
         {
             if (patientUpdate == null || patientUpdate.PatientId != patientId)
                 return BadRequest(ModelState);
@@ -162,6 +155,7 @@ namespace healthguard.Controllers
         }
 
         [HttpDelete("{patientId}")]
+        [Authorize(Roles = "Administrator,Patient")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

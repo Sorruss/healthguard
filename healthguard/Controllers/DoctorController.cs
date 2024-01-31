@@ -3,6 +3,7 @@ using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
 using healthguard.POST;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -45,7 +46,7 @@ namespace healthguard.Controllers
             if (!_doctorRepository.DoctorExists(doctorId))
                 return NotFound();
 
-            var doctor = _mapper.Map<DoctorDto>(_doctorRepository.GetDoctor(doctorId));
+            var doctor = _doctorRepository.GetDoctor(doctorId);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -53,6 +54,7 @@ namespace healthguard.Controllers
         }
 
         [HttpGet("mrecords/{doctorId}")]
+        [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<MedicalRecord>))]
         [ProducesResponseType(400)]
         public IActionResult GetMedicalRecordsByDoctor(int doctorId)
@@ -72,19 +74,10 @@ namespace healthguard.Controllers
         [ProducesResponseType(400)]
         public IActionResult CreateDoctor(
             [FromQuery] int spezId,
-            [FromBody] DoctorPOST doctorCreate)
+            [FromBody] DoctorDto doctorCreate)
         {
             if (doctorCreate == null)
                 return BadRequest(ModelState);
-
-            var doctor = _doctorRepository.GetDoctors()
-                .Where(e => e.Email == doctorCreate.Email).FirstOrDefault();
-
-            if (doctor != null)
-            {
-                ModelState.AddModelError("", "Doctor with this email already exists");
-                return StatusCode(422, ModelState);
-            }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -102,6 +95,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPut("{doctorId}")]
+        [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -116,8 +110,14 @@ namespace healthguard.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var doctorMap = _mapper.Map<Doctor>(doctorUpdate);
-            if (!_doctorRepository.UpdateDoctor(doctorMap))
+            var doctor = new Doctor
+            {
+                DoctorId = doctorUpdate.DoctorId,
+                Specialization = _specializationRepository.GetSpecialization(doctorUpdate.SpecializationId),
+                ApplicationUser = doctorUpdate.ApplicationUser
+            };
+
+            if (!_doctorRepository.UpdateDoctor(doctor))
             {
                 ModelState.AddModelError("", "Something went wrong updating doctor");
                 return StatusCode(500, ModelState);
@@ -127,6 +127,7 @@ namespace healthguard.Controllers
         }
 
         [HttpDelete("{doctorId}")]
+        [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

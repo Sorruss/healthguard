@@ -10,18 +10,21 @@ namespace healthguard.Helper
         public MappingProfiles()
         {
             CreateMap<Administrator, AdministratorDto>();
-            CreateMap<AdministratorPOST, Administrator>();
+            CreateMap<AdministratorDto, Administrator>();
 
             CreateMap<Patient, PatientDto>();
             CreateMap<PatientPOST, Patient>();
+            CreateMap<PatientUPDATE, Patient>();
 
             CreateMap<Company, CompanyDto>();
             CreateMap<CompanyDto, Company>();
 
             CreateMap<CompanyManager, CompanyManagerDto>();
+            CreateMap<CompanyManagerDto, CompanyManager>();
             CreateMap<CompanyManagerPOST, CompanyManager>();
 
             CreateMap<Doctor, DoctorDto>();
+            CreateMap<DoctorDto, Doctor>();
             CreateMap<DoctorPOST, Doctor>();
 
             CreateMap<Measurement, MeasurementDto>();

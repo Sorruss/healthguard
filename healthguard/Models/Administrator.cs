@@ -1,12 +1,8 @@
 ﻿namespace healthguard.Models
 {
-    public class Administrator : BaseUser
+    public class Administrator
     {
-        public Administrator()
-        {
-            Role = "Administrator";
-        }
-
         public int AdministratorId { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
     }
 }

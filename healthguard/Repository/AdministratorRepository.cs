@@ -1,6 +1,7 @@
 ﻿using healthguard.Data;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace healthguard.Repository
 {
@@ -20,7 +21,10 @@ namespace healthguard.Repository
 
         public Administrator GetAdministrator(int adminId)
         {
-            return _context.Administrators.Where(e => e.AdministratorId == adminId).FirstOrDefault();
+            return _context.Administrators
+                .Include(e => e.ApplicationUser)
+                .Where(e => e.AdministratorId == adminId)
+                .FirstOrDefault();
         }
 
         public bool AdministratorExists(int adminId)

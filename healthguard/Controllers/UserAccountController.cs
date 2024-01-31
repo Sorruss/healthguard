@@ -1,5 +1,6 @@
 ﻿using healthguard.Dto;
 using healthguard.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -8,17 +9,44 @@ namespace healthguard.Controllers
     [ApiController]
     public class UserAccountController : ControllerBase
     {
-        private readonly IUserAccountRepository _userAccountRepository;
+        private readonly IApplicationUserRepository _userAccountRepository;
 
-        public UserAccountController(IUserAccountRepository userAccountRepository)
+        public UserAccountController(IApplicationUserRepository userAccountRepository)
         {
             _userAccountRepository = userAccountRepository;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(UserDto userDto)
+        [Authorize(Roles = "Administrator")]
+        [HttpPost("register-admin")]
+        public async Task<IActionResult> RegisterAdministrator(ApplicationUserDto userDto)
         {
-            var response = await _userAccountRepository.CreateAccount(userDto);
+            var response = await _userAccountRepository.CreateAdministratorAccount(userDto);
+            return Ok(response);
+        }
+
+        [HttpPost("register-manager")]
+        public async Task<IActionResult> RegisterCompanyManager(
+            [FromBody] ApplicationUserDto userDto, 
+            [FromQuery] int companyId)
+        {
+            var response = await _userAccountRepository.CreateCompanyManagerAccount(userDto, companyId);
+            return Ok(response);
+        }
+
+        [HttpPost("register-doctor")]
+        public async Task<IActionResult> RegisterDoctor(ApplicationUserDto userDto, int spezId)
+        {
+            var response = await _userAccountRepository.CreateDoctorAccount(userDto, spezId);
+            return Ok(response);
+        }
+
+        [HttpPost("register-patient")]
+        public async Task<IActionResult> RegisterPatient(
+            [FromQuery] int btypeId,
+            [FromQuery] int companyId,
+            PatientUserDto userDto)
+        {
+            var response = await _userAccountRepository.CreatePatientAccount(userDto, btypeId, companyId);
             return Ok(response);
         }
 

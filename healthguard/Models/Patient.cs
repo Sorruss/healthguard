@@ -1,12 +1,7 @@
 ﻿namespace healthguard.Models
 {
-    public class Patient : BaseUser
+    public class Patient
     {
-        public Patient()
-        {
-            Role = "Patient";
-        }
-
         public int PatientId { get; set; }
         public string Gender { get; set; }
         public string Address { get; set; }
@@ -18,5 +13,6 @@
         public ICollection<Measurement> Measurements { get; set; }
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<MedicalRecord> MedicalRecords { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
     }
 }

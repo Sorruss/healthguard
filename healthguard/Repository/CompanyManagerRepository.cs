@@ -1,6 +1,7 @@
 ﻿using healthguard.Data;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace healthguard.Repository
 {
@@ -32,7 +33,10 @@ namespace healthguard.Repository
 
         public CompanyManager GetCompanyManager(int managerId)
         {
-            return _context.CompanyManagers.Where(e => e.CompanyManagerId == managerId).FirstOrDefault();
+            return _context.CompanyManagers
+                .Include(e => e.ApplicationUser)
+                .Where(e => e.CompanyManagerId == managerId)
+                .FirstOrDefault();
         }
 
         public ICollection<CompanyManager> GetCompanyManagers()

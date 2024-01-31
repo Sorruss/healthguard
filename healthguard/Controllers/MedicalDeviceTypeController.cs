@@ -2,6 +2,7 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -62,6 +63,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateMedicalDeviceType([FromBody] MedicalDeviceTypeDto medicalDeviceTypeCreate)
@@ -92,6 +94,7 @@ namespace healthguard.Controllers
         }
 
         [HttpPut("{mdevicetypeId}")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -119,6 +122,7 @@ namespace healthguard.Controllers
         }
 
         [HttpDelete("{mdevicetypeId}")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

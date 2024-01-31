@@ -1,6 +1,7 @@
 ﻿using healthguard.Data;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace healthguard.Repository
 {
@@ -32,7 +33,11 @@ namespace healthguard.Repository
 
         public Doctor GetDoctor(int doctorId)
         {
-            return _context.Doctors.Where(e => e.DoctorId == doctorId).FirstOrDefault();
+            return _context.Doctors
+                .Include(e => e.ApplicationUser)
+                .Include(e => e.Specialization)
+                .Where(e => e.DoctorId == doctorId)
+                .FirstOrDefault();
         }
 
         public ICollection<Doctor> GetDoctors()

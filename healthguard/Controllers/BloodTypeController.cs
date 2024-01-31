@@ -2,10 +2,12 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
 {
+    [Authorize]
     [Route("api/BloodTypes")]
     [ApiController]
     public class BloodTypeController : Controller
