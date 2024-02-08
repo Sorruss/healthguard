@@ -89,7 +89,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{spezId}")]
@@ -114,7 +114,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{spezId}")]
@@ -138,7 +138,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }

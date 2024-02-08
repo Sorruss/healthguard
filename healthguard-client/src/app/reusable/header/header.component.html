@@ -4,17 +4,53 @@
       <b style="font-size: 18px;font-weight: 600;">HealthGuard</b>
     </a>
 
-    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-      <li><a href="#" class="nav-link px-2 link-secondary">Головна</a></li>
+    <ul *ngIf="!isLoggedIn" class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a href="#" class="nav-link px-2 link-dark">Головна</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">Про сервіс</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">Ціни</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">FAQs</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">Про нас</a></li>
     </ul>
 
-    <div class="col-md-3 text-end">
+    <ul *ngIf="isLoggedIn && userInfo.role == 'Пацієнт'" class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a [routerLink]="['/pprofile', userId]" class="nav-link px-2 link-dark">Профіль</a></li>
+      <li><a [routerLink]="['/notifications']" class="nav-link px-2 link-dark">Повідомлення</a></li>
+      <li><a [routerLink]="['/medical-records']" class="nav-link px-2 link-dark">М. Записи</a></li>
+      <li><a [routerLink]="['/measurements']" class="nav-link px-2 link-dark">Вимірювання</a></li>
+    </ul>
+
+    <ul *ngIf="isLoggedIn && userInfo.role == 'Доктор'" class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a [routerLink]="['/dprofile', userId]" class="nav-link px-2 link-dark">Профіль</a></li>
+      <li><a [routerLink]="['/dnotifications']" class="nav-link px-2 link-dark">Повідомлення</a></li>
+      <li><a [routerLink]="['/dmedical-records']" class="nav-link px-2 link-dark">М. Записи</a></li>
+      <li><a [routerLink]="['/dpatients']" class="nav-link px-2 link-dark">Пацієнти</a></li>
+    </ul>
+
+    <ul *ngIf="isLoggedIn && userInfo.role == 'Менеджер'" class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a [routerLink]="['/mprofile', userId]" class="nav-link px-2 link-dark">Профіль</a></li>
+      <li><a [routerLink]="['/mpatients']" class="nav-link px-2 link-dark">Працівники</a></li>
+    </ul>
+
+    <ul *ngIf="isLoggedIn && userInfo.role == 'Адміністратор'" class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a [routerLink]="['/admin-panel']" class="nav-link px-2 link-dark">Панель адміністрування</a></li>
+    </ul>
+
+    <div *ngIf="!isLoggedIn; else elseBlock" class="col-md-3 text-end">
       <button [routerLink]="['/login']" type="button" class="btn btn-outline-primary me-2">Вхід</button>
       <button [routerLink]="['/register']" type="button" class="btn btn-primary">Реєстрація</button>
     </div>
+    <ng-template #elseBlock>
+      <div class="text-end">
+        <div class="row d-flex align-items-center">
+          <div class="col-md-9">
+            <div>Вітаємо, {{ userInfo.name }}</div>
+            <div><small>{{ userInfo.role }}</small></div>
+          </div>
+          <div class="col-md-3">
+            <button (click)="logout()" type="button" class="btn btn-outline-primary">Вихід</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
   </header>
 </div>

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
 {
-    [Authorize]
     [Route("api/BloodTypes")]
     [ApiController]
     public class BloodTypeController : Controller
@@ -46,6 +45,7 @@ namespace healthguard.Controllers
         }
 
         [HttpGet("patients/{btypeId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Patient>))]
         [ProducesResponseType(400)]
         public IActionResult GetPatientsByBloodType(int btypeId)

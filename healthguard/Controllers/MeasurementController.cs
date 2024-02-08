@@ -35,7 +35,7 @@ namespace healthguard.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<Measurement>))]
         public IActionResult GetMeasurements()
         {
-            var measurements = _mapper.Map<List<MeasurementDto>>(_measurementRepository.GetMeasurements());
+            var measurements = _measurementRepository.GetMeasurements();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -66,7 +66,7 @@ namespace healthguard.Controllers
             if (!_patientRepository.PatientExists(patientId))
                 return NotFound();
 
-            var measurements = _mapper.Map<List<MeasurementDto>>(_measurementRepository.GetMeasurementsByPatient(patientId));
+            var measurements = _measurementRepository.GetMeasurementsByPatient(patientId);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -94,8 +94,6 @@ namespace healthguard.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateMeasurement(
-            [FromQuery] int mdeviceId,
-            [FromQuery] int patientId,
             [FromBody] MeasurementDto measurementCreate)
         {
             if (measurementCreate == null)
@@ -114,9 +112,15 @@ namespace healthguard.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var measurementMap = _mapper.Map<Measurement>(measurementCreate);
-            measurementMap.MedicalDevice = _medicalDeviceRepository.GetMedicalDevice(mdeviceId);
-            measurementMap.Patient = _patientRepository.GetPatient(patientId);
+            var measurementMap = new Measurement
+            {
+                MeasurementId = measurementCreate.MeasurementId,
+                MeasurementDate = measurementCreate.MeasurementDate,
+                MeasurementValue = measurementCreate.MeasurementValue,
+                MedicalDevice = _medicalDeviceRepository.GetMedicalDevice(measurementCreate.MDeviceId),
+                Patient = _patientRepository.GetPatient(measurementCreate.PatientId),
+                PatientId = measurementCreate.PatientId
+            };
 
             if (!_measurementRepository.CreateMeasurement(measurementMap))
             {
@@ -124,7 +128,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{measurId}")]
@@ -150,7 +154,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{measurId}")]
@@ -174,7 +178,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }

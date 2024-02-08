@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
-import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
 import { LoginData } from './login.model';
-import { NgForm } from '@angular/forms';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,19 +9,12 @@ import { NgForm } from '@angular/forms';
 })
 export class LoginComponent {
 
-  url: string = environment.apiBaseUrl + "/Accounts/login"
   loginData: LoginData = new LoginData()
 
-  constructor(private http: HttpClient) { }
+  constructor(private authService: AuthService) { }
 
-  onSubmit(form: NgForm) {
-    this.http.post(this.url, this.loginData)
-      .subscribe({
-        next: res => {
-          console.log(res);
-        },
-        error: err => console.log(err)
-      });
+  onSubmit() {
+    this.authService.login(this.loginData);
   }
 
 }

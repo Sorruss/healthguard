@@ -83,7 +83,7 @@ namespace healthguard.Repository
         }
 
         public async Task<ServiceResponseDto.GeneralResponse> CreateCompanyManagerAccount(
-            ApplicationUserDto userDto, int companyId)
+            CompanyManagerUserDto userDto)
         {
             if (userDto == null)
                 return new ServiceResponseDto.GeneralResponse(false, "Model is empty");
@@ -110,9 +110,9 @@ namespace healthguard.Repository
             var companyManager = new CompanyManager
             {
                 CompanyManagerId = 0,
-                CompanyId = companyId,
+                CompanyId = userDto.CompanyId,
                 Company = _context.Companies
-                    .Where(e => e.CompanyId == companyId).FirstOrDefault(),
+                    .Where(e => e.CompanyId == userDto.CompanyId).FirstOrDefault(),
                 ApplicationUser = newUser
             };
             _companyManagerRepository.CreateCompanyManager(companyManager);
@@ -123,7 +123,7 @@ namespace healthguard.Repository
         }
 
         public async Task<ServiceResponseDto.GeneralResponse> CreateDoctorAccount(
-            ApplicationUserDto userDto, int spezId)
+            DoctorUserDto userDto)
         {
             if (userDto == null)
                 return new ServiceResponseDto.GeneralResponse(false, "Model is empty");
@@ -151,7 +151,7 @@ namespace healthguard.Repository
             {
                 DoctorId = 0,
                 Specialization = _context.Specializations
-                    .Where(e => e.SpecializationId == spezId).FirstOrDefault(),
+                    .Where(e => e.SpecializationId == userDto.SpezId).FirstOrDefault(),
                 ApplicationUser = newUser
             };
             _doctorRepository.CreateDoctor(doctor);
@@ -162,7 +162,7 @@ namespace healthguard.Repository
         }
 
         public async Task<ServiceResponseDto.GeneralResponse> CreatePatientAccount(
-            PatientUserDto userDto, int btypeId, int companyId)
+            PatientUserDto userDto)
         {
             if (userDto == null)
                 return new ServiceResponseDto.GeneralResponse(false, "Model is empty");
@@ -191,10 +191,10 @@ namespace healthguard.Repository
                 PatientId = 0,
                 ApplicationUser = newUser,
                 BloodType = _context.BloodTypes
-                    .Where(e => e.BloodTypeId == btypeId).FirstOrDefault(),
-                CompanyId = companyId,
+                    .Where(e => e.BloodTypeId == userDto.BTypeId).FirstOrDefault(),
+                CompanyId = userDto.CompanyId,
                 Company = _context.Companies
-                    .Where(e => e.CompanyId == companyId).FirstOrDefault(),
+                    .Where(e => e.CompanyId == userDto.CompanyId).FirstOrDefault(),
                 Gender = userDto.Gender,
                 Address = userDto.Address,
                 Age = userDto.Age,

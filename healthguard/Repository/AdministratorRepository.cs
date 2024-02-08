@@ -16,7 +16,10 @@ namespace healthguard.Repository
 
         public ICollection<Administrator> GetAdministrators()
         {
-            return _context.Administrators.OrderBy(e => e.AdministratorId).ToList();
+            return _context.Administrators
+                .Include(e => e.ApplicationUser)
+                .OrderBy(e => e.AdministratorId)
+                .ToList();
         }
 
         public Administrator GetAdministrator(int adminId)
@@ -54,6 +57,19 @@ namespace healthguard.Repository
         {
             _context.Remove(administrator);
             return Save();
+        }
+
+        public Administrator GetAdministratorByEmail(string email)
+        {
+            return _context.Administrators
+                .Include(e => e.ApplicationUser)
+                .Where(e => e.ApplicationUser.Email == email)
+                .FirstOrDefault();
+        }
+
+        public bool AdministratorExistsByEmail(string email)
+        {
+            return _context.Administrators.Any(e => e.ApplicationUser.Email == email);
         }
     }
 }

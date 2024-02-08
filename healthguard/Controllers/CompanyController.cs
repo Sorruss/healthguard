@@ -113,7 +113,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{companyId}")]
@@ -139,7 +139,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{companyId}")]
@@ -163,7 +163,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }

@@ -31,6 +31,11 @@ namespace healthguard.Repository
             return _context.Doctors.Any(e => e.DoctorId == doctorId);
         }
 
+        public bool DoctorExistsByEmail(string email)
+        {
+            return _context.Doctors.Any(e => e.ApplicationUser.Email == email);
+        }
+
         public Doctor GetDoctor(int doctorId)
         {
             return _context.Doctors
@@ -40,9 +45,22 @@ namespace healthguard.Repository
                 .FirstOrDefault();
         }
 
+        public Doctor GetDoctorByEmail(string email)
+        {
+            return _context.Doctors
+                .Include(e => e.ApplicationUser)
+                .Include(e => e.Specialization)
+                .Where(e => e.ApplicationUser.Email == email)
+                .FirstOrDefault();
+        }
+
         public ICollection<Doctor> GetDoctors()
         {
-            return _context.Doctors.OrderBy(e => e.DoctorId).ToList();
+            return _context.Doctors
+                .Include(e => e.Specialization)
+                .Include(e => e.ApplicationUser)
+                .OrderBy(e => e.DoctorId)
+                .ToList();
         }
 
         public ICollection<MedicalRecord> GetMedicalRecordsByDoctor(int doctorId)

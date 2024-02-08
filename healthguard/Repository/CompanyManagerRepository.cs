@@ -19,6 +19,11 @@ namespace healthguard.Repository
             return _context.CompanyManagers.Any(e => e.CompanyManagerId == managerId);
         }
 
+        public bool CompanyManagerExistsByEmail(string email)
+        {
+            return _context.CompanyManagers.Any(e => e.ApplicationUser.Email == email);
+        }
+
         public bool CreateCompanyManager(CompanyManager companyManager)
         {
             _context.Add(companyManager);
@@ -35,13 +40,26 @@ namespace healthguard.Repository
         {
             return _context.CompanyManagers
                 .Include(e => e.ApplicationUser)
+                .Include(e => e.Company)
                 .Where(e => e.CompanyManagerId == managerId)
+                .FirstOrDefault();
+        }
+
+        public CompanyManager GetCompanyManagerByEmail(string email)
+        {
+            return _context.CompanyManagers
+                .Include(e => e.ApplicationUser)
+                .Where(e => e.ApplicationUser.Email == email)
                 .FirstOrDefault();
         }
 
         public ICollection<CompanyManager> GetCompanyManagers()
         {
-            return _context.CompanyManagers.OrderBy(e => e.CompanyManagerId).ToList();
+            return _context.CompanyManagers
+                .Include(e => e.Company)
+                .Include(e => e.ApplicationUser)
+                .OrderBy(e => e.CompanyManagerId)
+                .ToList();
         }
 
         public bool Save()

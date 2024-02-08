@@ -71,6 +71,25 @@ namespace healthguard.Controllers
             return Ok(medicalRecords);
         }
 
+        [HttpGet("patient/{patientId}/doctor/{doctorId}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<MedicalRecord>))]
+        [ProducesResponseType(400)]
+        public IActionResult GetMedicalRecordsByPatient(int patientId, int doctorId)
+        {
+            if (!_patientRepository.PatientExists(patientId))
+                return NotFound();
+
+            if (!_doctorRepository.DoctorExists(doctorId))
+                return NotFound();
+
+            var medicalRecords = _mapper.Map<List<MedicalRecordDto>>(
+                _medicalRecordRepository.GetMedicalRecordsByPatientAndDoctor(patientId, doctorId));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(medicalRecords);
+        }
+
         [HttpGet("doctor/{doctorId}")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<MedicalRecord>))]
         [ProducesResponseType(400)]
@@ -109,7 +128,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{mrecordId}")]
@@ -135,7 +154,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{mrecordId}")]
@@ -159,7 +178,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }

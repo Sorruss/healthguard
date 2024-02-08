@@ -1,0 +1,26 @@
+<app-header></app-header>
+
+<div id="content" *ngIf="loaded; else stillLoading">
+  <div class="d-flex justify-content-between align-items-center">
+    <h2>Перелік повідомелень</h2>
+    <button (click)="createNotification()" class="btn btn-info">Написати повідомлення</button>
+  </div>
+  <ul class="list-group">
+    <li *ngFor="let notification of notifications" @fadeOut class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-1">{{ notification.title }}</h5>
+        <p class="mb-1">Для: <a href="" [routerLink]="['/pprofile', notification.patientId]">{{ notification.receiver }}</a></p>
+        <p class="mb-1">Зміст: {{ notification.content }}</p>
+        <small>Дата: {{ notification.date | date: 'dd/MM/yyyy HH:mm:ss' }}</small>
+      </div>
+      <div class="d-flex flex-column">
+        <button (click)="editNotification(notification.notificationId)" class="btn btn-info"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button style="margin-top: 10px;" (click)="deleteNotification(notification.notificationId)" class="btn btn-danger"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<ng-template #stillLoading>
+  Still Loading...
+</ng-template>

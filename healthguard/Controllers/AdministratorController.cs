@@ -2,22 +2,30 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
+using healthguard.POST;
+using healthguard.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
 
 namespace healthguard.Controllers
 {
-    [Authorize(Roles = "Administrator")]
     [Route("api/Administrators")]
     [ApiController]
     public class AdministratorController : Controller
     {
         private readonly IAdministratorRepository _administratorRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
-        public AdministratorController(IAdministratorRepository administratorRepository, IMapper mapper)
+        public AdministratorController(
+            IAdministratorRepository administratorRepository, 
+            UserManager<ApplicationUser> userManager,
+            IMapper mapper)
         {
             _administratorRepository = administratorRepository;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -25,7 +33,7 @@ namespace healthguard.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<Administrator>))]
         public IActionResult GetAdministrators()
         {
-            var administrators = _mapper.Map<List<AdministratorDto>>(_administratorRepository.GetAdministrators());
+            var administrators = _administratorRepository.GetAdministrators();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,7 +56,23 @@ namespace healthguard.Controllers
             return Ok(administrator);
         }
 
+        [HttpGet("email/{email}")]
+        [ProducesResponseType(200, Type = typeof(Administrator))]
+        [ProducesResponseType(400)]
+        public IActionResult GetAdministratorByEmail(string email)
+        {
+            if (!_administratorRepository.AdministratorExistsByEmail(email))
+                return NotFound();
+
+            var administrator = _administratorRepository.GetAdministratorByEmail(email);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(administrator);
+        }
+
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateAdministrator([FromBody] AdministratorDto administratorCreate)
@@ -66,16 +90,17 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{adminId}")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateAdministrator(int adminId, [FromBody] Administrator administratorUpdate)
+        public IActionResult UpdateAdministrator(int adminId, [FromBody] AdministratorUPDATE administratorUpdate)
         {
-            if (administratorUpdate == null || administratorUpdate.AdministratorId != adminId)
+            if (administratorUpdate == null)
                 return BadRequest(ModelState);
 
             if (!_administratorRepository.AdministratorExists(adminId))
@@ -84,17 +109,28 @@ namespace healthguard.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var administratorMap = _mapper.Map<Administrator>(administratorUpdate);
-            if (!_administratorRepository.UpdateAdministrator(administratorMap))
+            Administrator admin = _administratorRepository.GetAdministrator(adminId);
+            ApplicationUser account = admin.ApplicationUser;
+            account.LastName = administratorUpdate.LastName;
+            account.Name = administratorUpdate.Name;
+            account.MiddleName = administratorUpdate.MiddleName;
+            account.Email = administratorUpdate.Email;
+            account.PhoneNumber = administratorUpdate.PhoneNumber;
+            _userManager.UpdateAsync(account).Wait();
+
+            admin.ApplicationUser = account;
+
+            if (!_administratorRepository.UpdateAdministrator(admin))
             {
                 ModelState.AddModelError("", "Something went wrong updating administrator");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{adminId}")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -114,7 +150,34 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
+        }
+
+        [HttpDelete("acc/{adminId}")]
+        [Authorize(Roles = "Administrator")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteAdministratorAndAccount(int adminId)
+        {
+            if (!_administratorRepository.AdministratorExists(adminId))
+                return NotFound();
+
+            Administrator adminToDelete = _administratorRepository.GetAdministrator(adminId);
+            ApplicationUser account = adminToDelete.ApplicationUser;
+            adminToDelete.ApplicationUser = null;
+            _userManager.DeleteAsync(account).Wait();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_administratorRepository.DeleteAdministrator(adminToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong deleting patient");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(new { ok = true });
         }
     }
 }

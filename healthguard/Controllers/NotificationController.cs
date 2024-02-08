@@ -13,15 +13,18 @@ namespace healthguard.Controllers
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IDoctorRepository _doctorRepository;
         private readonly IMapper _mapper;
 
         public NotificationController(
             INotificationRepository notificationRepository,
             IPatientRepository patientRepository,
+            IDoctorRepository doctorRepository,
             IMapper mapper)
         {
             _notificationRepository = notificationRepository;
             _patientRepository = patientRepository;
+            _doctorRepository = doctorRepository;
             _mapper = mapper;
         }
 
@@ -67,6 +70,21 @@ namespace healthguard.Controllers
             return Ok(notifications);
         }
 
+        [HttpGet("doctor/{doctorId}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Notification>))]
+        [ProducesResponseType(400)]
+        public IActionResult GetNotificationsByDoctor(int doctorId)
+        {
+            if (!_doctorRepository.DoctorExists(doctorId))
+                return NotFound();
+
+            var notifications = _mapper.Map<List<NotificationDto>>(_notificationRepository.GetNotificationsByDoctor(doctorId));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(notifications);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Administrator,Doctor")]
         [ProducesResponseType(204)]
@@ -87,7 +105,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{notifId}")]
@@ -113,7 +131,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{notifId}")]
@@ -137,7 +155,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }

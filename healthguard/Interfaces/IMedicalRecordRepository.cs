@@ -8,6 +8,7 @@ namespace healthguard.Interfaces
         MedicalRecord GetMedicalRecord(int mrecordId);
         ICollection<MedicalRecord> GetMedicalRecordsByPatient(int patientId);
         ICollection<MedicalRecord> GetMedicalRecordsByDoctor(int doctorId);
+        ICollection<MedicalRecord> GetMedicalRecordsByPatientAndDoctor(int patientId, int doctorId);
         bool MedicalRecordExists(int mrecordId);
         bool CreateMedicalRecord(MedicalRecord medicalRecord);
         bool UpdateMedicalRecord(MedicalRecord medicalRecord);

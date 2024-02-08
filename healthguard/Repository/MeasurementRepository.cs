@@ -1,6 +1,7 @@
 ﻿using healthguard.Data;
 using healthguard.Interfaces;
 using healthguard.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace healthguard.Repository
 {
@@ -32,12 +33,20 @@ namespace healthguard.Repository
 
         public ICollection<Measurement> GetMeasurements()
         {
-            return _context.Measurements.OrderBy(e => e.MeasurementId).ToList();
+            return _context.Measurements
+                .Include(e => e.MedicalDevice)
+                .ThenInclude(e => e.MedicalDeviceType)
+                .OrderBy(e => e.MeasurementId)
+                .ToList();
         }
 
         public ICollection<Measurement> GetMeasurementsByPatient(int patientId)
         {
-            return _context.Measurements.Where(e => e.PatientId ==  patientId).ToList();
+            return _context.Measurements
+                .Include(e => e.MedicalDevice)
+                .ThenInclude(e => e.MedicalDeviceType)
+                .Where(e => e.PatientId ==  patientId)
+                .ToList();
         }
 
         public ICollection<Measurement> GetMeasurementsByPatientAndType(int patientId, int mdevicetypeId)

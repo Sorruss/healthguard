@@ -8,6 +8,9 @@
     <PublishAssetsDirectory>$(MSBuildProjectDirectory)\dist\healthguard-client\</PublishAssetsDirectory>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="src\app\guards\" />
     <Folder Include="src\app\reusable\" />
+    <Folder Include="src\app\services\" />
+    <Folder Include="src\app\services\auth\" />
   </ItemGroup>
 </Project>

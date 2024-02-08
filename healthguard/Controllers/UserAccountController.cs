@@ -26,27 +26,24 @@ namespace healthguard.Controllers
 
         [HttpPost("register-manager")]
         public async Task<IActionResult> RegisterCompanyManager(
-            [FromBody] ApplicationUserDto userDto, 
-            [FromQuery] int companyId)
+            [FromBody] CompanyManagerUserDto userDto)
         {
-            var response = await _userAccountRepository.CreateCompanyManagerAccount(userDto, companyId);
+            var response = await _userAccountRepository.CreateCompanyManagerAccount(userDto);
             return Ok(response);
         }
 
         [HttpPost("register-doctor")]
-        public async Task<IActionResult> RegisterDoctor(ApplicationUserDto userDto, int spezId)
+        public async Task<IActionResult> RegisterDoctor(DoctorUserDto doctorUserDto)
         {
-            var response = await _userAccountRepository.CreateDoctorAccount(userDto, spezId);
+            var response = await _userAccountRepository.CreateDoctorAccount(doctorUserDto);
             return Ok(response);
         }
 
         [HttpPost("register-patient")]
         public async Task<IActionResult> RegisterPatient(
-            [FromQuery] int btypeId,
-            [FromQuery] int companyId,
             PatientUserDto userDto)
         {
-            var response = await _userAccountRepository.CreatePatientAccount(userDto, btypeId, companyId);
+            var response = await _userAccountRepository.CreatePatientAccount(userDto);
             return Ok(response);
         }
 

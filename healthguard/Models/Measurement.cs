@@ -7,6 +7,6 @@
         public Patient Patient { get; set; }
         public float MeasurementValue { get; set; }
         public MedicalDevice MedicalDevice { get; set; }
-        public DateTime MeasurementDate { get; set; }
+        public DateTime MeasurementDate { get; set; } = DateTime.UtcNow;
     }
 }

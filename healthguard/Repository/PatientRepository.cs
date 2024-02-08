@@ -45,18 +45,48 @@ namespace healthguard.Repository
         {
             return _context.Patients
                 .Include(e => e.ApplicationUser)
+                .Include(e => e.BloodType)
                 .Where(e => e.PatientId == patientId)
+                .FirstOrDefault();
+        }
+
+        public Patient GetPatientByEmail(string email)
+        {
+            return _context.Patients
+                .Include(e => e.ApplicationUser)
+                .Include(e => e.BloodType)
+                .Where(e => e.ApplicationUser.Email == email)
                 .FirstOrDefault();
         }
 
         public ICollection<Patient> GetPatients()
         {
-            return _context.Patients.OrderBy(e => e.PatientId).ToList();
+            return _context.Patients
+                .Include(e => e.ApplicationUser)
+                .Include(e => e.Company)
+                .Include(e => e.BloodType)
+                .OrderBy(e => e.PatientId)
+                .ToList();
+        }
+
+        public ICollection<Patient> GetPatientsByDoctor(int doctorId)
+        {
+            return _context.MedicalRecords
+                .Where(medicalRecord => medicalRecord.DoctorId == doctorId)
+                .Include(medicalRecord => medicalRecord.Patient.ApplicationUser)
+                .Select(medicalRecord => medicalRecord.Patient)
+                .Distinct()
+                .ToList();
         }
 
         public bool PatientExists(int patientId)
         {
             return _context.Patients.Any(e => e.PatientId == patientId);
+        }
+
+        public bool PatientExistsByEmail(string email)
+        {
+            return _context.Patients.Any(e => e.ApplicationUser.Email == email);
         }
 
         public bool Save()

@@ -45,6 +45,13 @@ namespace healthguard.Repository
             return _context.MedicalRecords.Where(e => e.PatientId == patientId).ToList();
         }
 
+        public ICollection<MedicalRecord> GetMedicalRecordsByPatientAndDoctor(int patientId, int doctorId)
+        {
+            return _context.MedicalRecords
+                .Where(e => (e.PatientId == patientId && e.DoctorId == doctorId))
+                .ToList();
+        }
+
         public bool MedicalRecordExists(int mrecordId)
         {
             return _context.MedicalRecords.Any(e => e.MedicalRecordId == mrecordId);

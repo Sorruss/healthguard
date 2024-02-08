@@ -4,6 +4,7 @@ using healthguard.Interfaces;
 using healthguard.Models;
 using healthguard.POST;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace healthguard.Controllers
@@ -12,12 +13,14 @@ namespace healthguard.Controllers
     [ApiController]
     public class PatientController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IBloodTypeRepository _bloodTypeRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IPatientRepository _patientRepository;
         private readonly IMapper _mapper;
 
         public PatientController(
+            UserManager<ApplicationUser> userManager,
             IBloodTypeRepository bloodTypeRepository,
             ICompanyRepository companyRepository,
             IPatientRepository patientRepository,
@@ -26,6 +29,7 @@ namespace healthguard.Controllers
             _bloodTypeRepository = bloodTypeRepository;
             _companyRepository = companyRepository;
             _patientRepository = patientRepository;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -33,7 +37,7 @@ namespace healthguard.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<Patient>))]
         public IActionResult GetPatients()
         {
-            var patients = _mapper.Map<List<PatientDto>>(_patientRepository.GetPatients());
+            var patients = _patientRepository.GetPatients();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -54,6 +58,33 @@ namespace healthguard.Controllers
                 return BadRequest(ModelState);
 
             return Ok(patient);
+        }
+
+        [HttpGet("email/{email}")]
+        [ProducesResponseType(200, Type = typeof(Patient))]
+        [ProducesResponseType(400)]
+        public IActionResult GetPatientByEmail(string email)
+        {
+            if (!_patientRepository.PatientExistsByEmail(email))
+                return NotFound();
+
+            var patient = _patientRepository.GetPatientByEmail(email);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(patient);
+        }
+
+        [HttpGet("doctor/{doctorId}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Patient>))]
+        [ProducesResponseType(400)]
+        public IActionResult GetPatientsByDoctor(int doctorId)
+        {
+            var patients = _patientRepository.GetPatientsByDoctor(doctorId);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(patients);
         }
 
         [HttpGet("notifications/{patientId}")]
@@ -125,17 +156,17 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{patientId}")]
-        [Authorize(Roles = "Administrator,Patient")]
+        [Authorize(Roles = "Administrator,Patient,CompanyManager")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult UpdatePatient(int patientId, [FromBody] PatientUPDATE patientUpdate)
         {
-            if (patientUpdate == null || patientUpdate.PatientId != patientId)
+            if (patientUpdate == null)
                 return BadRequest(ModelState);
 
             if (!_patientRepository.PatientExists(patientId))
@@ -144,18 +175,32 @@ namespace healthguard.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var patientMap = _mapper.Map<Patient>(patientUpdate);
-            if (!_patientRepository.UpdatePatient(patientMap))
+            Patient patient = _patientRepository.GetPatient(patientId);
+            ApplicationUser account = patient.ApplicationUser;
+            account.LastName = patientUpdate.LastName;
+            account.Name = patientUpdate.Name;
+            account.MiddleName = patientUpdate.MiddleName;
+            account.Email = patientUpdate.Email;
+            account.PhoneNumber = patientUpdate.PhoneNumber;
+            _userManager.UpdateAsync(account).Wait();
+
+            patient.Address = patientUpdate.Address;
+            patient.Age = patientUpdate.Age;
+            patient.Height = patientUpdate.Height;
+            patient.BloodType = _bloodTypeRepository.GetBloodType(patientUpdate.BTypeId);
+            patient.ApplicationUser = account;
+
+            if (!_patientRepository.UpdatePatient(patient))
             {
                 ModelState.AddModelError("", "Something went wrong updating patient");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{patientId}")]
-        [Authorize(Roles = "Administrator,Patient")]
+        [Authorize(Roles = "Administrator,Patient,CompanyManager")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -175,7 +220,34 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
+        }
+
+        [HttpDelete("acc/{patientId}")]
+        [Authorize(Roles = "Administrator,Patient,CompanyManager")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeletePatientAndAccount(int patientId)
+        {
+            if (!_patientRepository.PatientExists(patientId))
+                return NotFound();
+
+            Patient patientToDelete = _patientRepository.GetPatient(patientId);
+            ApplicationUser account = patientToDelete.ApplicationUser;
+            patientToDelete.ApplicationUser = null;
+            _userManager.DeleteAsync(account).Wait();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_patientRepository.DeletePatient(patientToDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong deleting patient");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok(new { ok = true });
         }
     }
 }

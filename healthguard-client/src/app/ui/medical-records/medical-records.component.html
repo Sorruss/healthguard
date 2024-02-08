@@ -1,0 +1,13 @@
+<app-header></app-header>
+
+<div id="content">
+  <h2>Перелік медичних записів</h2>
+  <ul class="list-group">
+    <li *ngFor="let mrecord of medicalRecords" class="list-group-item">
+      <h5 class="mb-1">{{ mrecord.diagnosis }}</h5>
+      <p class="mb-1">Від: <a href="" [routerLink]="['/dprofile', mrecord.doctorId]">{{ mrecord.doctorFullName }}</a></p>
+      <p class="mb-1">Зміст: {{ mrecord.medications }}</p>
+      <small>Дата: {{ mrecord.visitDate | date: 'dd/MM/yyyy HH:mm:ss' }}</small>
+    </li>
+  </ul>
+</div>

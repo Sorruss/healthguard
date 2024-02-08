@@ -35,6 +35,11 @@ namespace healthguard.Repository
             return _context.Notifications.OrderBy(e => e.NotificationId).ToList();
         }
 
+        public ICollection<Notification> GetNotificationsByDoctor(int doctorId)
+        {
+            return _context.Notifications.Where(e => e.SenderId == doctorId).ToList();
+        }
+
         public ICollection<Notification> GetNotificationsByPatient(int patientId)
         {
             return _context.Notifications.Where(e => e.PatientId == patientId).ToList();

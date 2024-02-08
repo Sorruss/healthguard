@@ -8,5 +8,7 @@ namespace healthguard.Dto
         public DateTime VisitDate { get; set; }
         public string Diagnosis { get; set; }
         public string Medications { get; set; }
+        public int DoctorId { get; set; }
+        public int PatientId { get; set; }
     }
 }

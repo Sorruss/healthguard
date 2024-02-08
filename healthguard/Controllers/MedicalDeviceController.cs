@@ -32,7 +32,19 @@ namespace healthguard.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<MedicalDevice>))]
         public IActionResult GetMedicalDevices()
         {
-            var medicalDevices = _mapper.Map<List<MedicalDeviceDto>>(_medicalDeviceRepository.GetMedicalDevices());
+            var medicalDevices = _medicalDeviceRepository.GetMedicalDevices();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(medicalDevices);
+        }
+
+        [HttpGet("type/{mdevicetypeId}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<MedicalDevice>))]
+        public IActionResult GetMedicalDevicesByType(int mdevicetypeId)
+        {
+            var medicalDevices = _medicalDeviceRepository.GetMedicalDevicesByType(mdevicetypeId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -77,7 +89,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return Ok(new { ok = true });
         }
 
         [HttpPut("{mdeviceId}")]
@@ -103,7 +115,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
 
         [HttpDelete("{mdeviceId}")]
@@ -127,7 +139,7 @@ namespace healthguard.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return Ok(new { ok = true });
         }
     }
 }
