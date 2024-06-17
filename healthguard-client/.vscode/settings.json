@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/a85393c4-cdde-4a8e-89e3-1bb2f6822248/resourceGroups/healthguard/providers/Microsoft.Web/sites/healthguardclient",
+  "appService.deploySubpath": "dist\\healthguard-client"
+}

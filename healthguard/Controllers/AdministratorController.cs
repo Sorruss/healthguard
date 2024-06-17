@@ -2,12 +2,9 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
-using healthguard.POST;
-using healthguard.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Numerics;
 
 namespace healthguard.Controllers
 {

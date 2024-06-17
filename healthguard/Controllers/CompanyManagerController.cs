@@ -2,7 +2,6 @@
 using healthguard.Dto;
 using healthguard.Interfaces;
 using healthguard.Models;
-using healthguard.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

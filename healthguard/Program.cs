@@ -13,6 +13,7 @@ using System.Text;
 
 using Swashbuckle.AspNetCore.Filters;
 using healthguard.Models;
+using Azure.Storage.Blobs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,12 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
+
+builder.Services.AddScoped(_ =>
+{
+    return new BlobServiceClient(builder.Configuration.GetConnectionString("StorageConnection"));
+});
+builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 
